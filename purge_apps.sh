@@ -21,3 +21,6 @@ oc delete service --all
 
 echo -en "\n***** Delete Routes\n"
 oc delete route --all
+
+echo -en "\n***** Delete PVCs\n"
+oc delete pvc --all
