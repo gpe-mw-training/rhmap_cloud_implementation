@@ -3,6 +3,8 @@
 #  The registration enables OSE to access the Docker container images of RHMAP components hosted in the Red Hat Docker Registry.
 #  This script automates this registration across your OSE3 cluster
 #
+#  NOTE:  To use this scrpt, you will need to know (up front) the poolid of your subscription that includes entitlements to RHMAP bits.
+#
 # Usage
 #    ,/configure_rhn.sh <RHN User Id> <RHN password> <poolId of subscription with RHMAP entitlements>
 
