@@ -4,7 +4,7 @@
 #  This script automates this registration across your OSE3 cluster
 #
 # Usage
-    ,/configure_rhn.sh <RHN User Id> <RHN password> <poolId of subscription with RHMAP entitlements>
+#    ,/configure_rhn.sh <RHN User Id> <RHN password> <poolId of subscription with RHMAP entitlements>
 
 # Example
 #   ./configure_rhn.sh rhn-gps-jab XXXXX  8a85f9843e3d687a013e3ddd471a083e
