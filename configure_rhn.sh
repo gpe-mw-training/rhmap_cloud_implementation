@@ -11,14 +11,16 @@
 # Example
 #   ./configure_rhn.sh rhn-gps-jab XXXXX  8a85f9843e3d687a013e3ddd471a083e
 
-export MONGODB_IMAGE=rhmap41/mongodb
-export MONGODB_IMAGE_VERSION=3.2-1
+export MONGODB_IMAGE=rhmap42/mongodb
+export MONGODB_IMAGE_VERSION=latest
 
 for node in infranode1.example.com  \
         node1.example.com \
         node2.example.com \
         node3.example.com \
-        node4.example.com; 
+        node4.example.com \ 
+        node5.example.com \ 
+        node6.example.com; 
 do 
         echo -en "\nConfiguring RHN for: $node\n"; 
         ssh $node " subscription-manager register --username=$1 --password=$2; subscription-manager attach --pool=$3; mv /etc/yum.repos.d/open.repo /etc/yum.repos.d/open.repo.bk; yum install -y subscription-manager-plugin-container --disablerepo=* --enablerepo=rhel-7-server-optional-rpms; /usr/libexec/rhsmcertd-worker; docker pull $MONGODB_IMAGE:$MONGODB_IMAGE_VERSION"; 
