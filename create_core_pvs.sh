@@ -6,7 +6,7 @@ function createPVs() {
 echo -en "\n\n Creating the following PVs $startVol .. $endVol of the following size: $volsize   ********** \n";
 
 for i in $(seq ${startVol} ${endVol}) ; do
-volume=`echo vol$1`;
+volume=`echo vol$i`;
 
 cat <<EOF > /root/pvs/${volume}
 {
