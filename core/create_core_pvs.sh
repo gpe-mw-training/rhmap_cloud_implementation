@@ -35,18 +35,18 @@ done;
 
 # MongoDB and FH SCM PVs
 volsize="10Gi"
-startVol=4
-endVol=5
+startVol=5
+endVol=6
 createPVs
 
-# GitLab Shell and MySQL PVs
+# GitLab Shell, MySQL and Metrics Backup Log PVs
 volsize="5Gi"
-startVol=6
-endVol=7
+startVol=7
+endVol=9
 createPVs
 
 # Nagios PV
 volsize="1Gi"
-startVol=8
-endVol=8
+startVol=10
+endVol=10
 createPVs
