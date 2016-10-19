@@ -4,12 +4,22 @@
   "metadata": {
     "name": "fh-mbaas",
     "annotations": {
-      "templateVersion": "0.21.7-redhat-3",
+      "templateVersion": "0.22.169-redhat-3",
       "description": "Red Hat Mobile Backend as a Service template",
       "iconClass": "icon-nodejs"
     }
   },
   "objects": [
+    {
+      "kind": "ConfigMap",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "fh-mbaas-info"
+      },
+      "data": {
+        "version": "4.2.0"
+      }
+    },
     {
       "kind": "Service",
       "apiVersion": "v1",
@@ -22,18 +32,12 @@
       "spec": {
         "ports": [
           {
-            "name": "fh-mbaas-service-ports",
-            "protocol": "TCP",
-            "port": 8080,
-            "targetPort": 8080,
-            "nodePort": 0
+            "port": 8080
           }
         ],
         "selector": {
           "name": "fh-mbaas"
-        },
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        }
       }
     },
     {
@@ -48,18 +52,12 @@
       "spec": {
         "ports": [
           {
-            "name": "fh-messaging-service-ports",
-            "protocol": "TCP",
-            "port": 8080,
-            "targetPort": 8080,
-            "nodePort": 0
+            "port": 8080
           }
         ],
         "selector": {
           "name": "fh-messaging"
-        },
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        }
       }
     },
     {
@@ -74,18 +72,12 @@
       "spec": {
         "ports": [
           {
-            "name": "fh-metrics-service-ports",
-            "protocol": "TCP",
-            "port": 8080,
-            "targetPort": 8080,
-            "nodePort": 0
+            "port": 8080
           }
         ],
         "selector": {
           "name": "fh-metrics"
-        },
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        }
       }
     },
     {
@@ -114,9 +106,7 @@
         ],
         "selector": {
           "name": "fh-statsd"
-        },
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        }
       }
     },
     {
@@ -131,19 +121,13 @@
       "spec": {
         "ports": [
           {
-            "protocol": "TCP",
-            "port": 27017,
-            "targetPort": 27017,
-            "nodePort": 0
+            "port": 27017
           }
         ],
         "selector": {
           "name": "mongodb-replica-1"
         },
-        "portalIP": "None",
-        "clusterIP": "None",
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        "clusterIP": "None"
       }
     },
     {
@@ -158,19 +142,13 @@
       "spec": {
         "ports": [
           {
-            "protocol": "TCP",
-            "port": 27017,
-            "targetPort": 27017,
-            "nodePort": 0
+            "port": 27017
           }
         ],
         "selector": {
           "name": "mongodb-replica-2"
         },
-        "portalIP": "None",
-        "clusterIP": "None",
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
+        "clusterIP": "None"
       }
     },
     {
@@ -185,19 +163,81 @@
       "spec": {
         "ports": [
           {
-            "protocol": "TCP",
-            "port": 27017,
-            "targetPort": 27017,
-            "nodePort": 0
+            "port": 27017
           }
         ],
         "selector": {
           "name": "mongodb-replica-3"
         },
-        "portalIP": "None",
-        "clusterIP": "None",
+        "clusterIP": "None"
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "nagios",
+        "labels": {
+          "name": "nagios"
+        },
+        "creationTimestamp": null
+      },
+      "spec": {
+        "ports": [
+          {
+            "protocol": "TCP",
+            "port": 8080,
+            "targetPort": 8080
+          }
+        ],
+        "selector": {
+          "name": "nagios"
+        },
         "type": "ClusterIP",
         "sessionAffinity": "None"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "kind": "ServiceAccount",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "nagios"
+      }
+    },
+    {
+      "kind": "RoleBinding",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "nagiosadmin"
+      },
+      "subjects": [
+        {
+          "kind": "ServiceAccount",
+          "name": "nagios"
+        }
+      ],
+      "roleRef": {
+        "name": "admin"
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "nagios-claim-1"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "1Gi"
+          }
+        }
       }
     },
     {
@@ -212,11 +252,6 @@
       "spec": {
         "strategy": {
           "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 300
-          },
           "resources": {
             "limits": {
               "cpu": "800m",
@@ -250,8 +285,7 @@
                 "image": "${FH_MBAAS_IMAGE}:${FH_MBAAS_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 8080,
-                    "protocol": "TCP"
+                    "containerPort": 8080
                   }
                 ],
                 "env": [
@@ -309,6 +343,10 @@
                   {
                     "name": "FH_LOG_LEVEL",
                     "value": "${FH_DEFAULT_LOG_LEVEL}"
+                  },
+                  {
+                    "name": "MONGODB_REPLICA_NAME",
+                    "value": "${MONGODB_REPLICA_NAME}"
                   }
                 ],
                 "resources": {
@@ -321,16 +359,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
-                "imagePullPolicy": "IfNotPresent",
-                "securityContext": {
-                  "capabilities": {},
-                  "privileged": false
-                }
+                "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -347,11 +378,6 @@
       "spec": {
         "strategy": {
           "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 300
-          },
           "resources": {
             "limits": {
               "cpu": "400m",
@@ -385,30 +411,13 @@
                 "image": "${FH_MESSAGING_IMAGE}:${FH_MESSAGING_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 8080,
-                    "protocol": "TCP"
+                    "containerPort": 8080
                   }
                 ],
                 "env": [
                   {
                     "name": "FH_MESSAGING_CRON",
                     "value": "10 0 * * *"
-                  },
-                  {
-                    "name": "FH_MBAASID",
-                    "value": "${FH_MBAASID}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_USER",
-                    "value": "${MONGODB_FHMETRICS_USER}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_PASSWORD",
-                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_DATABASE",
-                    "value": "fh-metrics"
                   },
                   {
                     "name": "MONGODB_FHREPORTING_USER",
@@ -430,6 +439,10 @@
                   {
                     "name": "FH_LOG_LEVEL",
                     "value": "${FH_DEFAULT_LOG_LEVEL}"
+                  },
+                  {
+                    "name": "MONGODB_REPLICA_NAME",
+                    "value": "${MONGODB_REPLICA_NAME}"
                   }
                 ],
                 "resources": {
@@ -442,16 +455,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
-                "imagePullPolicy": "IfNotPresent",
-                "securityContext": {
-                  "capabilities": {},
-                  "privileged": false
-                }
+                "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -468,11 +474,6 @@
       "spec": {
         "strategy": {
           "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 300
-          },
           "resources": {
             "limits": {
               "cpu": "400m",
@@ -506,8 +507,7 @@
                 "image": "${FH_METRICS_IMAGE}:${FH_METRICS_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 8080,
-                    "protocol": "TCP"
+                    "containerPort": 8080
                   }
                 ],
                 "env": [
@@ -528,18 +528,6 @@
                     "value": "fh-reporting"
                   },
                   {
-                    "name": "MONGODB_FHMETRICS_USER",
-                    "value": "${MONGODB_FHMETRICS_USER}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_PASSWORD",
-                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_DATABASE",
-                    "value": "fh-metrics"
-                  },
-                  {
                     "name": "FH_METRICS_API_KEY",
                     "description": "API Key for calling fh-metrics",
                     "value": "${FH_METRICS_API_KEY}"
@@ -547,6 +535,10 @@
                   {
                     "name": "FH_LOG_LEVEL",
                     "value": "${FH_DEFAULT_LOG_LEVEL}"
+                  },
+                  {
+                    "name": "MONGODB_REPLICA_NAME",
+                    "value": "${MONGODB_REPLICA_NAME}"
                   }
                 ],
                 "resources": {
@@ -559,16 +551,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
-                "imagePullPolicy": "IfNotPresent",
-                "securityContext": {
-                  "capabilities": {},
-                  "privileged": false
-                }
+                "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -585,11 +570,6 @@
       "spec": {
         "strategy": {
           "type": "Rolling",
-          "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 300
-          },
           "resources": {
             "limits": {
               "cpu": "400m",
@@ -623,8 +603,7 @@
                 "image": "${FH_STATSD_IMAGE}:${FH_STATSD_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 8080,
-                    "protocol": "TCP"
+                    "containerPort": 8080
                   }
                 ],
                 "env": [
@@ -648,19 +627,136 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
-                "imagePullPolicy": "IfNotPresent",
-                "securityContext": {
-                  "capabilities": {},
-                  "privileged": false
-                }
+                "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "nagios",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate",
+          "recreateParams": {
+            "timeoutSeconds": 600
+          },
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "test": false,
+        "selector": {
+          "name": "nagios"
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "name": "nagios"
+            }
+          },
+          "spec": {
+            "volumes": [
+              {
+                "name": "nagios-data-volume",
+                "persistentVolumeClaim": {
+                  "claimName": "nagios-claim-1"
+                }
+              }
+            ],
+            "containers": [
+              {
+                "name": "nagios",
+                "image": "${NAGIOS_IMAGE}:${NAGIOS_IMAGE_VERSION}",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "protocol": "TCP"
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "name": "nagios-data-volume",
+                    "mountPath": "/var/log/nagios"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "SMTP_SERVER",
+                    "value": "${SMTP_SERVER}"
+                  },
+                  {
+                    "name": "SMTP_USERNAME",
+                    "value": "${SMTP_USERNAME}"
+                  },
+                  {
+                    "name": "SMTP_PASSWORD",
+                    "value": "${SMTP_PASSWORD}"
+                  },
+                  {
+                    "name": "SMTP_TLS",
+                    "value": "${SMTP_TLS}"
+                  },
+                  {
+                    "name": "SMTP_FROM_ADDRESS",
+                    "value": "${SMTP_FROM_ADDRESS}"
+                  },
+                  {
+                    "name": "ADMIN_EMAIL",
+                    "value": "${ADMIN_EMAIL}"
+                  },
+                  {
+                    "name": "NAGIOS_USER",
+                    "value": "${NAGIOS_USER}"
+                  },
+                  {
+                    "name": "NAGIOS_PASSWORD",
+                    "value": "${NAGIOS_PASSWORD}"
+                  },
+                  {
+                    "name": "RHMAP_ROUTER_DNS",
+                    "value": "${RHMAP_ROUTER_DNS}"
+                  },
+                  {
+                    "name": "RHMAP_HOSTGROUPS",
+                    "value": "${RHMAP_HOSTGROUPS}"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "800m",
+                    "memory": "800Mi"
+                  },
+                  "requests": {
+                    "cpu": "200m",
+                    "memory": "200Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "imagePullPolicy": "IfNotPresent"
+              }
+            ],
+            "restartPolicy": "Always",
+            "terminationGracePeriodSeconds": 30,
+            "dnsPolicy": "ClusterFirst",
+            "serviceAccountName": "nagios",
+            "serviceAccount": "nagios",
+            "securityContext": {}
+          }
+        }
+      },
+      "status": {}
     },
     {
       "kind": "PersistentVolumeClaim",
@@ -769,8 +865,7 @@
                 "image": "${MONGODB_IMAGE}:${MONGODB_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 27017,
-                    "protocol": "TCP"
+                    "containerPort": 27017
                   }
                 ],
                 "volumeMounts": [
@@ -782,7 +877,7 @@
                 "env": [
                   {
                     "name": "MONGODB_REPLICA_NAME",
-                    "value": "rs0"
+                    "value": "${MONGODB_REPLICA_NAME}"
                   },
                   {
                     "name": "MONGODB_SERVICE_NAME",
@@ -825,18 +920,6 @@
                     "value": "fh-statsd"
                   },
                   {
-                    "name": "MONGODB_FHMETRICS_USER",
-                    "value": "${MONGODB_FHMETRICS_USER}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_PASSWORD",
-                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_DATABASE",
-                    "value": "fh-metrics"
-                  },
-                  {
                     "name": "MONGODB_FHREPORTING_USER",
                     "value": "${MONGODB_FHREPORTING_USER}"
                   },
@@ -859,12 +942,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
                 "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -925,8 +1005,7 @@
                 "image": "${MONGODB_IMAGE}:${MONGODB_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 27017,
-                    "protocol": "TCP"
+                    "containerPort": 27017
                   }
                 ],
                 "volumeMounts": [
@@ -938,7 +1017,7 @@
                 "env": [
                   {
                     "name": "MONGODB_REPLICA_NAME",
-                    "value": "rs0"
+                    "value": "${MONGODB_REPLICA_NAME}"
                   },
                   {
                     "name": "MONGODB_SERVICE_NAME",
@@ -981,18 +1060,6 @@
                     "value": "fh-statsd"
                   },
                   {
-                    "name": "MONGODB_FHMETRICS_USER",
-                    "value": "${MONGODB_FHMETRICS_USER}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_PASSWORD",
-                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_DATABASE",
-                    "value": "fh-metrics"
-                  },
-                  {
                     "name": "MONGODB_FHREPORTING_USER",
                     "value": "${MONGODB_FHREPORTING_USER}"
                   },
@@ -1015,12 +1082,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
                 "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -1081,8 +1145,7 @@
                 "image": "${MONGODB_IMAGE}:${MONGODB_IMAGE_VERSION}",
                 "ports": [
                   {
-                    "containerPort": 27017,
-                    "protocol": "TCP"
+                    "containerPort": 27017
                   }
                 ],
                 "volumeMounts": [
@@ -1094,7 +1157,7 @@
                 "env": [
                   {
                     "name": "MONGODB_REPLICA_NAME",
-                    "value": "rs0"
+                    "value": "${MONGODB_REPLICA_NAME}"
                   },
                   {
                     "name": "MONGODB_SERVICE_NAME",
@@ -1137,18 +1200,6 @@
                     "value": "fh-statsd"
                   },
                   {
-                    "name": "MONGODB_FHMETRICS_USER",
-                    "value": "${MONGODB_FHMETRICS_USER}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_PASSWORD",
-                    "value": "${MONGODB_FHMETRICS_PASSWORD}"
-                  },
-                  {
-                    "name": "MONGODB_FHMETRICS_DATABASE",
-                    "value": "fh-metrics"
-                  },
-                  {
                     "name": "MONGODB_FHREPORTING_USER",
                     "value": "${MONGODB_FHREPORTING_USER}"
                   },
@@ -1171,12 +1222,9 @@
                     "memory": "200Mi"
                   }
                 },
-                "terminationMessagePath": "/dev/termination-log",
                 "imagePullPolicy": "IfNotPresent"
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
       }
@@ -1197,8 +1245,7 @@
             "image": "${MONGODB_IMAGE}:${MONGODB_IMAGE_VERSION}",
             "ports": [
               {
-                "containerPort": 27017,
-                "protocol": "TCP"
+                "containerPort": 27017
               }
             ],
             "command": [
@@ -1207,7 +1254,7 @@
             ],
             "env": [
               {
-                "name": "MBAAS_NAMESPACE",
+                "name": "METADATA_NAMESPACE",
                 "valueFrom": {
                   "fieldRef": {
                     "fieldPath": "metadata.namespace"
@@ -1216,7 +1263,7 @@
               },
               {
                 "name": "MONGODB_REPLICA_NAME",
-                "value": "rs0"
+                "value": "${MONGODB_REPLICA_NAME}"
               },
               {
                 "name": "MONGODB_SERVICE_NAME",
@@ -1247,18 +1294,6 @@
                 "value": "${MONGODB_ADMIN_PASSWORD}"
               },
               {
-                "name": "MONGODB_FHMETRICS_USER",
-                "value": "${MONGODB_FHMETRICS_USER}"
-              },
-              {
-                "name": "MONGODB_FHMETRICS_PASSWORD",
-                "value": "${MONGODB_FHMETRICS_PASSWORD}"
-              },
-              {
-                "name": "MONGODB_FHMETRICS_DATABASE",
-                "value": "fh-metrics"
-              },
-              {
                 "name": "MONGODB_FHREPORTING_USER",
                 "value": "${MONGODB_FHREPORTING_USER}"
               },
@@ -1279,12 +1314,10 @@
                 "value": "${ENDPOINT_COUNT}"
               }
             ],
-            "terminationMessagePath": "/dev/termination-log",
             "imagePullPolicy": "IfNotPresent"
           }
         ],
-        "restartPolicy": "Never",
-        "dnsPolicy": "ClusterFirst"
+        "restartPolicy": "Never"
       }
     },
     {
@@ -1306,6 +1339,28 @@
           "termination": "edge",
           "insecureEdgeTerminationPolicy": "Allow"
         }
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "nagios",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "host": "",
+        "to": {
+          "kind": "Service",
+          "name": "nagios"
+        },
+        "tls": {
+          "termination": "edge",
+          "insecureEdgeTerminationPolicy": "Allow"
+        }
+      },
+      "status": {
+        "ingress": null
       }
     }
   ],
@@ -1362,24 +1417,13 @@
       "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "MONGODB_FHMETRICS_USER",
-      "value": "u-metrics",
-      "description": "The Metrics user name"
-    },
-    {
-      "name": "MONGODB_FHMETRICS_PASSWORD",
-      "description": "The MongoDB Metrics password",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}"
-    },
-    {
       "name": "FH_MBAAS_IMAGE",
       "value": "rhmap42/fh-mbaas",
       "description": "The name of the fh-mbaas image"
     },
     {
       "name": "FH_MBAAS_IMAGE_VERSION",
-      "value": "latest",
+      "value": "5.2.3-4",
       "description": "The version for the FH_MBAAS_IMAGE"
     },
     {
@@ -1389,7 +1433,7 @@
     },
     {
       "name": "FH_MESSAGING_IMAGE_VERSION",
-      "value": "latest",
+      "value": "3.0.1-3",
       "description": "The version for the FH_MESSAGING_IMAGE"
     },
     {
@@ -1399,7 +1443,7 @@
     },
     {
       "name": "FH_METRICS_IMAGE_VERSION",
-      "value": "latest",
+      "value": "3.0.1-4",
       "description": "The version for the FH_METRICS_IMAGE"
     },
     {
@@ -1409,7 +1453,7 @@
     },
     {
       "name": "FH_STATSD_IMAGE_VERSION",
-      "value": "latest",
+      "value": "2.0.2-1",
       "description": "The version for the FH_STATSD_IMAGE"
     },
     {
@@ -1419,7 +1463,7 @@
     },
     {
       "name": "MONGODB_IMAGE_VERSION",
-      "value": "latest",
+      "value": "3.2-9",
       "description": "The version for the MONGODB_IMAGE"
     },
     {
@@ -1469,6 +1513,72 @@
       "name": "FH_DEFAULT_LOG_LEVEL",
       "description": "A default log level for all MBaaS components",
       "value": "info"
+    },
+    {
+      "name": "SMTP_SERVER",
+      "description": "SMTP server address to use for sending alert emails e.g. 1.2.3.4:25",
+      "value": "localhost"
+    },
+    {
+      "name": "SMTP_USERNAME",
+      "description": "SMTP username",
+      "value": "username"
+    },
+    {
+      "name": "SMTP_PASSWORD",
+      "description": "SMTP password",
+      "value": "password"
+    },
+    {
+      "name": "SMTP_TLS",
+      "description": "Use TLS for message delivery (auto|yes|no)",
+      "value": "auto"
+    },
+    {
+      "name": "SMTP_FROM_ADDRESS",
+      "description": "From email address for alerts",
+      "value": "admin@example.com"
+    },
+    {
+      "name": "ADMIN_EMAIL",
+      "description": "To email address for alerts",
+      "value": "root@localhost"
+    },
+    {
+      "name": "NAGIOS_USER",
+      "description": "Nagios admin username",
+      "value": "nagiosadmin"
+    },
+    {
+      "name": "NAGIOS_PASSWORD",
+      "description": "Nagios admin user password",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{10}"
+    },
+    {
+      "name": "RHMAP_ROUTER_DNS",
+      "description": "Host or Service name for RHMAP",
+      "value": "localhost"
+    },
+    {
+      "name": "RHMAP_HOSTGROUPS",
+      "description": "RHMAP hostgroups being monitored (core|mbaas|core,mbaas)",
+      "value": "mbaas"
+    },
+    {
+      "name": "NAGIOS_IMAGE",
+      "description": "The name of the Nagios Docker image",
+      "value": "rhmap42/nagios"
+    },
+    {
+      "name": "NAGIOS_IMAGE_VERSION",
+      "description": "The version of the Nagios Docker image",
+      "value": "4.0.8-25"
+    },
+    {
+      "name": "MONGODB_REPLICA_NAME",
+      "description": "The mongodb replicaset name",
+      "value": "rs0"
     }
   ]
 }

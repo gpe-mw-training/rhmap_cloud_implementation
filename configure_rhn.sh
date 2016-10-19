@@ -11,6 +11,19 @@
 # Example
 #   ./configure_rhn.sh rhn-gps-jab XXXXX  8a85f9843e3d687a013e3ddd471a083e
 
+if [ x$1 == x ];then
+    echo -en "\nERROR: Please pass RHN userId as first command line parameter to this script.\n\n"
+    exit 1;
+fi
+if [ x$2 == x ];then
+    echo -en "\nERROR: Please pass RHN password as second command line parameter to this script.\n\n"
+    exit 1;
+fi
+if [ x$3 == x ];then
+    echo -en "\nERROR: Please pass RHMAP enabled poolId as third command line parameter to this script.\n\n"
+    exit 1;
+fi
+
 export MONGODB_IMAGE=rhmap42/mongodb
 export MONGODB_IMAGE_VERSION=latest
 
