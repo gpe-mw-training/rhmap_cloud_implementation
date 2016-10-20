@@ -5,11 +5,19 @@
 #
 #  NOTE:  To use this scrpt, you will need to know (up front) the poolid of your subscription that includes entitlements to RHMAP bits.
 #
-# Usage
+# Usage (execute the following from master1.example.com)
 #    ,/configure_rhn.sh <RHN User Id> <RHN password> <poolId of subscription with RHMAP entitlements>
 
 # Example
 #   ./configure_rhn.sh rhn-gps-jab XXXXX  8a85f9843e3d687a013e3ddd471a083e
+
+
+
+
+
+
+
+thisHost=`hostname`
 
 if [ x$1 == x ];then
     echo -en "\nERROR: Please pass RHN userId as first command line parameter to this script.\n\n"
@@ -23,6 +31,10 @@ if [ x$3 == x ];then
     echo -en "\nERROR: Please pass RHMAP enabled poolId as third command line parameter to this script.\n\n"
     exit 1;
 fi
+if [ $thisHost != "master1"* ];then
+   echo -en "\nERROR: Please execute this script on the master1.example.com node.  You are currently on: $thisHost \n\n"
+   exit 1;
+fi 
 
 export MONGODB_IMAGE=rhmap42/mongodb
 export MONGODB_IMAGE_VERSION=latest
