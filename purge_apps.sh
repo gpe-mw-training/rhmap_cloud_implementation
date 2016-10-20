@@ -27,3 +27,5 @@ oc delete pvc --all
 
 echo -en "\n***** Delete ConfigMaps\n"
 oc delete configmaps --all
+
+echo -en "\n ***** DONE DELETING OSE resources.  Don't forget to clean out all NFS shares at:   oselab.example.com:/src/nfs/vol*\n\n"
