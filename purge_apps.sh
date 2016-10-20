@@ -24,3 +24,6 @@ oc delete route --all
 
 echo -en "\n***** Delete PVCs\n"
 oc delete pvc --all
+
+echo -en "\n***** Delete ConfigMaps\n"
+oc delete configmaps --all
