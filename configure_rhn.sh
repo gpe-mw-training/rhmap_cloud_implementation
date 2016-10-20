@@ -31,7 +31,7 @@ if [ x$3 == x ];then
     echo -en "\nERROR: Please pass RHMAP enabled poolId as third command line parameter to this script.\n\n"
     exit 1;
 fi
-if [ $thisHost != "master1"* ];then
+if [[ $thisHost != "master1"* ]];then
    echo -en "\nERROR: Please execute this script on the master1.example.com node.  You are currently on: $thisHost \n\n"
    exit 1;
 fi 
