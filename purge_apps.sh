@@ -28,4 +28,10 @@ oc delete pvc --all
 echo -en "\n***** Delete ConfigMaps\n"
 oc delete configmaps --all
 
-echo -en "\n ***** DONE DELETING OSE resources.  Don't forget to clean out all NFS shares at:   oselab.example.com:/src/nfs/vol*\n\n"
+echo -en "\n***** Delete SA\n"
+oc delete sa --all
+
+echo -en "\n***** Delete rolebinding\n"
+oc delete rolebinding --all
+
+echo -en "\n ***** DONE DELETING OSE resources.  Don't forget to clean out all NFS shares at:   oselab.example.com:/srv/nfs/vol*\n\n"
