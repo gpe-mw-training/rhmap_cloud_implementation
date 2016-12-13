@@ -11,7 +11,7 @@
 # TO-DO:  replace with ansible script:  https://github.com/redhat-gpe/rhmap_cloud_implementation/issues/38#issuecomment-266460245
 
 # Example
-#   ./configure_rhn.sh rhn-gps-jab XXXXX  8a85f9843e3d687a013e3ddd471a083e
+#   ./configure_rhn.sh rhn-gps-jab "XXXXX"  8a85f9843e3d687a013e3ddd471a083e
 
 
 
