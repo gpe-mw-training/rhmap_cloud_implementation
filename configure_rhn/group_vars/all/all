@@ -1,5 +1,0 @@
-mongo_image: rhmap42/mongodb
-mongo_version: latest
-rhn_user: change_me
-rhn_password: change_me
-rhn_pool: change_me
