@@ -56,8 +56,5 @@ done
 echo -en "\n\n *******  Done configuring subscription-manager on RHMAP nodes   ********** \n\n";
 
 # Configure RHMAP subscription on OSE master1 (so as to be able to install rhmap-fh-openshift-templates)
-subscription-manager register --username=$1 --password=$2;
-subscription-manager attach --pool=$3;
-mv /etc/yum.repos.d/open.repo /etc/yum.repos.d/open.repo.bk;
-yum install -y rhmap-fh-openshift-templates --disablerepo=* --enablerepo=rhel-7-server-rhmap-4.2-rpms
+ssh master1.example.com " subscription-manager register --username=$1 --password=$2; subscription-manager attach --pool=$3; mv /etc/yum.repos.d/open.repo /etc/yum.repos.d/open.repo.bk; yum install -y rhmap-fh-openshift-templates --disablerepo=* --enablerepo=rhel-7-server-rhmap-4.2-rpms"
 echo -en "\n\n *******  Done configuring subscription-manager on master node   ********** \n";
