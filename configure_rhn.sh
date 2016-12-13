@@ -11,7 +11,7 @@
 # TO-DO:  replace with ansible script:  https://github.com/redhat-gpe/rhmap_cloud_implementation/issues/38#issuecomment-266460245
 
 # Example
-#   ./configure_rhn.sh rhn-gps-jab "XXXXX"  8a85f9843e3d687a013e3ddd471a083e
+#   ./configure_rhn.sh rhn-gps-jab 'XXXXX'  8a85f9843e3d687a013e3ddd471a083e
 
 
 
@@ -33,8 +33,8 @@ if [ x$3 == x ];then
     echo -en "\nERROR: Please pass RHMAP enabled poolId as third command line parameter to this script.\n\n"
     exit 1;
 fi
-if [[ $thisHost != "master1"* ] || [$thisHost != "osenode"*]];then
-   echo -en "\nERROR: Please execute this script on either the osenode or master1 nodes.  You are currently on: $thisHost \n\n"
+if [[ "$thisHost" != "master1"* ]]  || [["$thisHost" != "oselab"*]];then
+   echo -en "\nERROR: Please execute this script on either the oselab or master1 nodes.  You are currently on: $thisHost \n\n"
    exit 1;
 fi 
 
