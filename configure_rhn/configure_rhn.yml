@@ -1,0 +1,50 @@
+---
+- name: Registering nodes with RHN for Red Hat Mobile
+  hosts: all
+  tasks:
+    - name: Subscribe to RHN
+      redhat_subscription:
+        state: present
+        username: "{{ rhn_user }}"
+        password: "{{ rhn_password }}"
+        pool: "{{ rhn_pool }}"
+    #    pool: '^(Red Hat Enterprise Server|Red Hat Virtualization)$'
+    - name: See if open.repo exists
+      stat:
+        path: /etc/yum.repos.d/open.repo
+      register: yum_repo
+
+    - name: Change OPEN.REPO to .BAK
+      command: mv /etc/yum.repos.d/open.repo /etc/yum.repos.d/open.repo.bak
+      when: yum_repo.stat.exists
+
+- name: install_software | Enable correct repo for RH Mobile and install packages
+  hosts: infranode,node
+  tasks:
+    - name: Configure correct repos
+      yum:
+        disablerepo: "*"
+        enablerepo: "rhel-7-server-optional-rpms"
+        name: "subscription-manager-plugin-container"
+        state: latest
+
+    - name: Update RHSM certs
+      command: "/usr/libexec/rhsmcertd-worker"
+
+    - name: install_software | Pull down Docker Image
+      docker_image:
+        name: "{{ mongo_image }}"
+        tag: "{{ mongo_version }}"
+
+- name: Configure REPO and SOFTWARE on masters
+  hosts: master
+  tasks:
+    - name: install_software | Enable correct repo for RH Mobile and install packages
+      yum:
+        disablerepo: "*"
+        enablerepo: "rhel-7-server-rhmap-4.2-rpms"
+        name: rhmap-fh-openshift-templates
+        state: latest
+
+    - name: Update RHSM certs
+      command: "/usr/libexec/rhsmcertd-worker"
