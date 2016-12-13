@@ -19,7 +19,7 @@
       when: yum_repo.stat.exists
 
 - name: install_software | Enable correct repo for RH Mobile and install packages
-  hosts: infranode,node
+  hosts: infranode:rhmap_nodes
   tasks:
     - name: Configure correct repos
       yum:

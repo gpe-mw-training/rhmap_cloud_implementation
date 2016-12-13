@@ -4,7 +4,7 @@ master1.example.com
 [infranode]
 infranode1.example.com
 
-[node]
+[rhmap_nodes]
 node1.example.com
 node2.example.com
 node3.example.com
