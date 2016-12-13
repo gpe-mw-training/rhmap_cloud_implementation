@@ -33,10 +33,10 @@ if [ x$3 == x ];then
     echo -en "\nERROR: Please pass RHMAP enabled poolId as third command line parameter to this script.\n\n"
     exit 1;
 fi
-if [[ "$thisHost" != "master1"* ]]  || [["$thisHost" != "oselab"*]];then
-   echo -en "\nERROR: Please execute this script on either the oselab or master1 nodes.  You are currently on: $thisHost \n\n"
+if [[ $thisHost != "oselab"* ]];then
+   echo -en "\nERROR: Please execute this script on the oselab node.  You are currently on: $thisHost \n\n"
    exit 1;
-fi 
+fi
 
 export MONGODB_IMAGE=rhmap42/mongodb
 export MONGODB_IMAGE_VERSION=latest
